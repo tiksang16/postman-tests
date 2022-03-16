@@ -1,0 +1,337 @@
+{
+	"info": {
+		"_postman_id": "8155e409-eee9-41f5-9604-c23fdae9d858",
+		"name": "Postman API Testing - Trello",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Board",
+			"item": [
+				{
+					"name": "GET /1/boards/{id}",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"completed\": \"false\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}boards/2cekU3tJ/?key={{API_KEY}}&token={{API_TOKEN}}",
+							"host": [
+								"{{baseUrl}}boards"
+							],
+							"path": [
+								"2cekU3tJ",
+								""
+							],
+							"query": [
+								{
+									"key": "key",
+									"value": "{{API_KEY}}"
+								},
+								{
+									"key": "token",
+									"value": "{{API_TOKEN}}"
+								}
+							]
+						},
+						"description": "Get a single board"
+					},
+					"response": []
+				},
+				{
+					"name": "GET /1/boards/{id}/lists",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}boards/2cekU3tJ/lists?key={{API_KEY}}&token={{API_TOKEN}}",
+							"host": [
+								"{{baseUrl}}boards"
+							],
+							"path": [
+								"2cekU3tJ",
+								"lists"
+							],
+							"query": [
+								{
+									"key": "key",
+									"value": "{{API_KEY}}"
+								},
+								{
+									"key": "token",
+									"value": "{{API_TOKEN}}"
+								}
+							]
+						},
+						"description": "Get all the list on a board"
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"verify status to be 200\", function(){",
+							"    pm.response.to.have.status(200);",
+							"})"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Cards",
+			"item": [
+				{
+					"name": "POST /1/cards",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set('cardId', pm.response.json().id)\r",
+									"\r",
+									"pm.test(\"verify 200 status response\", function(){\r",
+									"    pm.response.to.have.status(200);\r",
+									"})\r",
+									"\r",
+									"pm.test((\"Verify name is not empty\"), function(){\r",
+									"    pm.expect(pm.response.json().name).to.not.be.empty;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.log('pre test script');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"scripttesting\",\r\n    \"idBoard\": \"62051cae562ac61525657364\",\r\n    \"idList\": \"62051cae562ac61525657365\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}cards?key={{API_KEY}}&token={{API_TOKEN}}",
+							"host": [
+								"{{baseUrl}}cards"
+							],
+							"query": [
+								{
+									"key": "key",
+									"value": "{{API_KEY}}"
+								},
+								{
+									"key": "token",
+									"value": "{{API_TOKEN}}"
+								}
+							]
+						},
+						"description": "Create a new card"
+					},
+					"response": []
+				},
+				{
+					"name": "GET /1/cards/{id}",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const baseUrl = pm.variables.get('baseUrl')\r",
+									"const key = pm.collectionVariables.get('API_KEY')\r",
+									"const token = pm.collectionVariables.get('API_TOKEN')\r",
+									"\r",
+									"\r",
+									"pm.sendRequest(`${baseUrl}list/62051cae562ac61525657365/cards?key=${key}&token=${token}`, function (err, response) {\r",
+									"    pm.variables.set('card_id', response.json()[0].id)\r",
+									"    console.log(pm.variables.get('card_id'))\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test((\"Verify response body\"), function() {\r",
+									"    pm.expect(pm.response.json().id).to.eql(pm.variables.get(\"card_id\"));\r",
+									"    pm.expect(pm.response.json().idLabels).to.be.an(\"array\")\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}cards/{{card_id}}?key={{API_KEY}}&token={{API_TOKEN}}",
+							"host": [
+								"{{baseUrl}}cards"
+							],
+							"path": [
+								"{{card_id}}"
+							],
+							"query": [
+								{
+									"key": "key",
+									"value": "{{API_KEY}}"
+								},
+								{
+									"key": "token",
+									"value": "{{API_TOKEN}}"
+								}
+							]
+						},
+						"description": "Get a card by its ID"
+					},
+					"response": []
+				},
+				{
+					"name": "PUT /1/cards/{id}",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"verify 200 status response\", function(){\r",
+									"    pm.response.to.have.status(200);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"asdsadsad\",\r\n    \"desc\": \"test\",\r\n    \"idBoard\": \"62051cae562ac61525657364\",\r\n    \"idList\": \"62051cae562ac61525657365\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}cards/620788016e6dc61740324474?key={{API_KEY}}&token={{API_TOKEN}}",
+							"host": [
+								"{{baseUrl}}cards"
+							],
+							"path": [
+								"620788016e6dc61740324474"
+							],
+							"query": [
+								{
+									"key": "key",
+									"value": "{{API_KEY}}"
+								},
+								{
+									"key": "token",
+									"value": "{{API_TOKEN}}"
+								}
+							]
+						},
+						"description": "Update a card"
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE /1/cards/{id}",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}cards/{{cardId}}?key={{API_KEY}}&token={{API_TOKEN}}",
+							"host": [
+								"{{baseUrl}}cards"
+							],
+							"path": [
+								"{{cardId}}"
+							],
+							"query": [
+								{
+									"key": "key",
+									"value": "{{API_KEY}}"
+								},
+								{
+									"key": "token",
+									"value": "{{API_TOKEN}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "API_KEY",
+			"value": "402197460115478e7257b5775e18fce5"
+		},
+		{
+			"key": "API_TOKEN",
+			"value": "7f93dee65a53b061706adafe209d885c343b467fe39ebc53e6dbc3959f3aaeac"
+		},
+		{
+			"key": "cardId",
+			"value": ""
+		}
+	]
+}
